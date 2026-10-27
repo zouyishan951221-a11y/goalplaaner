@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="以理財目標為核心，用 PV、FV、PMT 診斷達成率並給出行動建議。">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="理財目標導航">
+<meta property="og:description" content="以理財目標為核心，用 PV、FV、PMT 診斷達成率並給出行動建議。">
+<meta name="theme-color" content="#1B6A55">
+<title>理財目標導航</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<script src="assets/js/app.js" defer></script>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true"><circle cx="23" cy="23" r="21" fill="none" stroke="var(--ink)" stroke-width="2"/><circle cx="23" cy="23" r="15" fill="none" stroke="var(--line)" stroke-width="1"/><path d="M23 7 L27 23 L23 39 L19 23 Z" fill="var(--jade)"/><path d="M23 7 L27 23 L19 23 Z" fill="var(--gold)"/><circle cx="23" cy="23" r="2.5" fill="var(--card)" stroke="var(--ink)" stroke-width="1.2"/></svg>
+      <div>
+        <h1>理財目標導航</h1>
+        <p>把一個理財目標，換算成每個月該做的事</p>
+      </div>
+    </div>
+    <div class="formula" aria-label="核心公式">
+      <div><b>FV</b> = PV·(1+i)<sup>n</sup> + PMT·[(1+i)<sup>n</sup>−1]/i</div>
+      <div>i = 年報酬率 ÷ 12，n = 年數 × 12（期末付款）</div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-plan" aria-selected="true" data-view="plan">目標分析</button>
+    <button class="tab" role="tab" id="tab-tools" aria-selected="false" data-view="tools">PV · FV · PMT 工具箱</button>
+    <button class="tab" role="tab" id="tab-all" aria-selected="false" data-view="all">全部目標總覽</button>
+  </nav>
+
+  <!-- PLAN VIEW -->
+  <section id="view-plan">
+    <div class="goalbar" id="goalbar"></div>
+    <div class="grid">
+      <aside class="card form" aria-label="目標設定">
+        <div>
+          <div class="eyebrow">Step 1 · 設定目標</div>
+          <h2 style="margin-top:4px">我的理財目標</h2>
+        </div>
+        <div class="types" id="types"></div>
+        <div class="fields">
+          <div class="field full"><label for="f-name">目標名稱</label><div class="inp"><input id="f-name" type="text" data-k="name" maxlength="20"></div></div>
+          <div class="field full"><label for="f-target">目標金額（今日幣值）<span class="tag">FV 目標</span></label><div class="inp"><input id="f-target" type="number" inputmode="decimal" min="0" step="10" data-k="target"><span class="u">萬元</span></div></div>
+          <div class="field"><label for="f-years">還有幾年<span class="tag">n</span></label><div class="inp"><input id="f-years" type="number" inputmode="numeric" min="1" max="60" step="1" data-k="years"><span class="u">年</span></div><input type="range" id="r-years" min="1" max="50" step="1" data-k="years" aria-label="年數滑桿"></div>
+          <div class="field"><label for="f-r">預期年報酬<span class="tag">i</span></label><div class="inp"><input id="f-r" type="number" inputmode="decimal" min="-5" max="30" step="0.5" data-k="r"><span class="u">%</span></div><input type="range" id="r-r" min="0" max="12" step="0.5" data-k="r" aria-label="報酬率滑桿"></div>
+          <div class="field"><label for="f-pv">目前已有<span class="tag">PV</span></label><div class="inp"><input id="f-pv" type="number" inputmode="decimal" min="0" step="1" data-k="pv"><span class="u">萬元</span></div></div>
+          <div class="field"><label for="f-pmt">每月投入<span class="tag">PMT</span></label><div class="inp"><input id="f-pmt" type="number" inputmode="numeric" min="0" step="1000" data-k="pmt"><span class="u">元</span></div></div>
+        </div>
+        <details class="adv" open>
+          <summary>進階假設：通膨、加薪、年齡</summary>
+          <div class="fields">
+            <div class="field"><label for="f-inf">通膨率</label><div class="inp"><input id="f-inf" type="number" inputmode="decimal" min="0" max="15" step="0.5" data-k="inf"><span class="u">%</span></div></div>
+            <div class="field"><label for="f-g">每年調升月投入</label><div class="inp"><input id="f-g" type="number" inputmode="decimal" min="0" max="20" step="1" data-k="g"><span class="u">%</span></div></div>
+            <div class="field full"><label for="f-age">目前年齡（選填）</label><div class="inp"><input id="f-age" type="number" inputmode="numeric" min="0" max="100" step="1" data-k="age" placeholder="例如 40"><span class="u">歲</span></div></div>
+          </div>
+        </details>
+        <div class="formfoot">
+          <span class="note" id="savenote">變更會自動儲存在這台裝置</span>
+          <button class="btn danger" id="del">刪除目標</button>
+        </div>
+      </aside>
+
+      <div class="results">
+        <div class="card">
+          <div class="eyebrow">Step 2 · 診斷</div>
+          <div class="verdict" style="margin-top:8px">
+            <div class="ratio num" id="ratio">0<span>%</span></div>
+            <div>
+              <span class="pill" id="pill"></span>
+              <p id="verdict"></p>
+            </div>
+            <div class="bar" aria-hidden="true"><i id="barfill"></i><span class="mark" id="barmark"></span><span class="mlbl" id="barlbl">100%</span></div>
+          </div>
+          <div style="height:22px"></div>
+          <div class="metrics" id="metrics"></div>
+        </div>
+
+        <div class="card">
+          <div class="charthead">
+            <h2>資產累積路徑</h2>
+            <div class="legend">
+              <span><i style="background:var(--jade)"></i>預估資產（FV）</span>
+              <span><i style="background:var(--muted);opacity:.5;height:8px"></i>累計投入本金</span>
+              <span><i style="background:var(--gold)"></i>目標（隨通膨上升）</span>
+            </div>
+          </div>
+          <div id="chart"></div>
+        </div>
+
+        <div class="card">
+          <div class="eyebrow">Step 3 · 行動建議</div>
+          <h2 style="margin-top:4px">怎麼做才能達標</h2>
+          <div class="advice" id="advice"></div>
+        </div>
+
+        <div class="card">
+          <h2>情境壓力測試</h2>
+          <div class="sub">報酬率上下各 2 個百分點，其他條件不變</div>
+          <div class="scen" id="scen"></div>
+        </div>
+
+        <div class="card">
+          <details class="yt">
+            <summary>逐年明細表</summary>
+            <div class="tablewrap" id="yeartable"></div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOOLS VIEW -->
+  <section id="view-tools" hidden>
+    <p class="note" style="margin:0 0 16px;font-size:13.5px;max-width:70ch">三個獨立計算器，每個都附上對應的 Excel 函數。Excel 以負數代表現金流出（存入、繳款），正數代表流入。</p>
+    <div class="tools">
+      <div class="card tool" id="t-pv">
+        <div class="head"><div class="letter">PV</div><div><h2>現值：今天要準備多少</h2><div class="sub">例：退休後每月領 3 萬、領 25 年，退休當天需準備多少</div></div></div>
+        <div class="fields">
+          <div class="field"><label for="pv-rate">年報酬率</label><div class="inp"><input id="pv-rate" type="number" step="0.25" value="3"><span class="u">%</span></div></div>
+          <div class="field"><label for="pv-years">期間</label><div class="inp"><input id="pv-years" type="number" step="1" value="25"><span class="u">年</span></div></div>
+          <div class="field"><label for="pv-pmt">每期領取</label><div class="inp"><input id="pv-pmt" type="number" step="1000" value="30000"><span class="u">元</span></div></div>
+          <div class="field"><label for="pv-fv">期末仍留</label><div class="inp"><input id="pv-fv" type="number" step="10000" value="0"><span class="u">元</span></div></div>
+          <div class="field full"><label>每期為</label><div class="seg" data-tool="pv"><button aria-pressed="true" data-f="12">每月</button><button aria-pressed="false" data-f="1">每年</button></div></div>
+        </div>
+        <div><div class="eyebrow">需要的現值</div><div class="big" id="pv-out"></div><div class="note" id="pv-note"></div></div>
+        <div class="excel"><code id="pv-xl"></code><button data-copy="pv-xl">複製</button></div>
+        <div class="note">提領金額若以今日幣值估算，報酬率請填「實質報酬率」（報酬率 − 通膨），結果才會是今日幣值。</div>
+        <button class="btn primary" id="pv-use">帶入目前目標的目標金額</button>
+      </div>
+
+      <div class="card tool" id="t-fv">
+        <div class="head"><div class="letter">FV</div><div><h2>終值：未來會變成多少</h2><div class="sub">例：已有 50 萬，每月再投入 1 萬，20 年後會有多少</div></div></div>
+        <div class="fields">
+          <div class="field"><label for="fv-rate">年報酬率</label><div class="inp"><input id="fv-rate" type="number" step="0.25" value="5"><span class="u">%</span></div></div>
+          <div class="field"><label for="fv-years">期間</label><div class="inp"><input id="fv-years" type="number" step="1" value="20"><span class="u">年</span></div></div>
+          <div class="field"><label for="fv-pv">目前本金</label><div class="inp"><input id="fv-pv" type="number" step="10000" value="500000"><span class="u">元</span></div></div>
+          <div class="field"><label for="fv-pmt">每期投入</label><div class="inp"><input id="fv-pmt" type="number" step="1000" value="10000"><span class="u">元</span></div></div>
+          <div class="field full"><label>每期為</label><div class="seg" data-tool="fv"><button aria-pressed="true" data-f="12">每月</button><button aria-pressed="false" data-f="1">每年</button></div></div>
+        </div>
+        <div><div class="eyebrow">未來終值</div><div class="big" id="fv-out"></div></div>
+        <div><div class="split" id="fv-split"></div><div class="splitlbl" id="fv-splitlbl" style="margin-top:6px"></div></div>
+        <div class="excel"><code id="fv-xl"></code><button data-copy="fv-xl">複製</button></div>
+      </div>
+
+      <div class="card tool" id="t-pmt">
+        <div class="head"><div class="letter">PMT</div><div><h2>每期金額：每月要存或繳多少</h2><div class="sub" id="pmt-sub">例：10 年後要存到 300 萬，每月該存多少</div></div></div>
+        <div class="seg" data-mode><button aria-pressed="true" data-m="save">存錢達標</button><button aria-pressed="false" data-m="loan">貸款攤還</button></div>
+        <div class="fields">
+          <div class="field"><label for="pmt-rate">年利率</label><div class="inp"><input id="pmt-rate" type="number" step="0.05" value="4"><span class="u">%</span></div></div>
+          <div class="field"><label for="pmt-years">期間</label><div class="inp"><input id="pmt-years" type="number" step="1" value="10"><span class="u">年</span></div></div>
+          <div class="field" id="pmt-a-wrap"><label for="pmt-a" id="pmt-a-lbl">目標金額</label><div class="inp"><input id="pmt-a" type="number" step="10000" value="3000000"><span class="u">元</span></div></div>
+          <div class="field" id="pmt-b-wrap"><label for="pmt-b">目前已有</label><div class="inp"><input id="pmt-b" type="number" step="10000" value="200000"><span class="u">元</span></div></div>
+        </div>
+        <div><div class="eyebrow" id="pmt-eye">每月需存</div><div class="big" id="pmt-out"></div><div class="note" id="pmt-note"></div></div>
+        <div class="excel"><code id="pmt-xl"></code><button data-copy="pmt-xl">複製</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OVERVIEW -->
+  <section id="view-all" hidden>
+    <div class="overview-sum" id="ovsum"></div>
+    <div class="card">
+      <h2>所有目標</h2>
+      <div class="sub">把同時進行的目標放在一起看，確認每月現金流撐得住</div>
+      <div class="tablewrap" id="ovtable"></div>
+    </div>
+  </section>
+
+  <footer>試算採月複利、期末投入，報酬率與通膨皆為假設值，實際結果會隨市場波動。本工具供規劃與教學參考，不構成個別投資建議。</footer>
+</div>
+
+
+</body>
+</html>
